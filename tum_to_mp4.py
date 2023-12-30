@@ -36,7 +36,7 @@ def make_video_from_images(folder_path, output_video_file, fps=30):
     print(f"Video saved as {output_video_file}, FPS: {fps}")
 
 # Folder containing images and output video file
-folder_path = 'rgb'
+folder_path = '/home/ubuntu/Downloads/data_tracking_image_2/training/image_02/0019'
 output_video_file = 'output_video.mp4'
 
 # Create the video
