@@ -528,7 +528,7 @@ with gr.Blocks() as iface:
 
     # first step: get the video information 
     extract_frames_button.click(
-        folder_path = '/home/ubuntu/Downloads/data_tracking_image_2/training/image_02/0019'
+        folder_path = '/home/ubuntu/Downloads/data_tracking_image_2/training/image_02/0002'
         fn=get_frames_from_folder(folder_path, video_state),
         inputs=[
             video_input, video_state
