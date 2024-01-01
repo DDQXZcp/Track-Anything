@@ -122,6 +122,64 @@ def get_frames_from_video(video_input, video_state):
                         gr.update(visible=True), gr.update(visible=True), \
                         gr.update(visible=True, value=operation_log)
 
+# New function
+def get_frames_from_folder(folder_path, video_state):
+    """
+    Args:
+        folder_path: str - Path to the folder containing images
+    Return:
+        Updated video state with loaded frames
+    """
+    frames = []
+    user_name = time.time()
+    operation_log = [("",""),("Images loaded from folder. Try clicking the image for adding targets to track and inpaint.","Normal")]
+    try:
+        # List all images in folder
+        image_files = [img for img in os.listdir(folder_path) if img.endswith(".png") or img.endswith(".jpg")]
+        image_files.sort()  # Sort the images if they are numbered
+
+        # Read images
+        for image_file in image_files:
+            frame = cv2.imread(os.path.join(folder_path, image_file))
+            if frame is not None:
+                frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            else:
+                print(f"Failed to read the image: {image_file}")
+
+        if not frames:
+            raise FileNotFoundError("No images found in the folder.")
+
+    except Exception as e:
+        print(f"Error reading images from folder: {e}")
+        operation_log = [(f"Error reading images from folder: {e}", "Error")]
+    
+    if frames:
+        image_size = (frames[0].shape[0], frames[0].shape[1])
+        # Initialize video_state
+        video_state = {
+            "user_name": user_name,
+            "video_name": folder_path.split('/')[-1],
+            "origin_images": frames,
+            "painted_images": frames.copy(),
+            "masks": [np.zeros((frames[0].shape[0], frames[0].shape[1]), np.uint8)]*len(frames),
+            "logits": [None]*len(frames),
+            "select_frame_number": 0,
+            "fps": 30  # Assuming a default FPS, change if necessary
+        }
+        video_info = "Folder Name: {}, Total Images: {}, Image Size: {}".format(video_state["video_name"], len(frames), image_size)
+        model.samcontroler.sam_controler.reset_image() 
+        model.samcontroler.sam_controler.set_image(video_state["origin_images"][0])
+
+        return video_state, video_info, video_state["origin_images"][0], gr.update(visible=True, maximum=len(frames), value=1), gr.update(visible=True, maximum=len(frames), value=len(frames)), \
+                            gr.update(visible=True),\
+                            gr.update(visible=True), gr.update(visible=True), \
+                            gr.update(visible=True), gr.update(visible=True), \
+                            gr.update(visible=True), gr.update(visible=True), \
+                            gr.update(visible=True), gr.update(visible=True), \
+                            gr.update(visible=True, value=operation_log)
+    else:
+        return None, "No images loaded", None, None, None, None, None, None, None, None, None, None, None, None, None
+
 def run_example(example):
     return video_input
 # get the select frame from gradio slider
@@ -470,7 +528,8 @@ with gr.Blocks() as iface:
 
     # first step: get the video information 
     extract_frames_button.click(
-        fn=get_frames_from_video,
+        folder_path = '/home/ubuntu/Downloads/data_tracking_image_2/training/image_02/0019'
+        fn=get_frames_from_folder(folder_path, video_state),
         inputs=[
             video_input, video_state
         ],
