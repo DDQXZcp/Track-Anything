@@ -130,6 +130,8 @@ def get_frames_from_folder(folder_path, video_state):
     Return:
         Updated video state with loaded frames
     """
+    # Modify folder_path to local
+    # folder_path = '/home/ubuntu/Downloads/data_tracking_image_2/training/image_02/0002'
     frames = []
     user_name = time.time()
     operation_log = [("",""),("Images loaded from folder. Try clicking the image for adding targets to track and inpaint.","Normal")]
@@ -158,7 +160,7 @@ def get_frames_from_folder(folder_path, video_state):
         # Initialize video_state
         video_state = {
             "user_name": user_name,
-            "video_name": folder_path.split('/')[-1],
+            "video_name": folder_path.split('/')[-1] + '.mp4',
             "origin_images": frames,
             "painted_images": frames.copy(),
             "masks": [np.zeros((frames[0].shape[0], frames[0].shape[1]), np.uint8)]*len(frames),
@@ -166,7 +168,7 @@ def get_frames_from_folder(folder_path, video_state):
             "select_frame_number": 0,
             "fps": 30  # Assuming a default FPS, change if necessary
         }
-        video_info = "Folder Name: {}, Total Images: {}, Image Size: {}".format(video_state["video_name"], len(frames), image_size)
+        video_info = "Video Name: {}, FPS: {}, Total Frames: {}, Image Size:{}".format(video_state["video_name"], video_state["fps"], len(frames), image_size)
         model.samcontroler.sam_controler.reset_image() 
         model.samcontroler.sam_controler.set_image(video_state["origin_images"][0])
 
@@ -335,15 +337,26 @@ def vos_tracking_video(video_state, interactive_state, mask_dropdown):
                                                                                                                                         interactive_state["negative_click_times"]))
 
     #### shanggao code for mask save
+    # Modify Save mask
     if interactive_state["mask_save"]:
-        if not os.path.exists('./result/mask/{}'.format(video_state["video_name"].split('.')[0])):
-            os.makedirs('./result/mask/{}'.format(video_state["video_name"].split('.')[0]))
-        i = 0
+        mask_npy_directory = './result/mask/{}'.format(video_state["video_name"].split('.')[0])
+        mask_img_directory = './result/mask_img/{}'.format(video_state["video_name"].split('.')[0])
+        
+        if not os.path.exists(mask_npy_directory):
+            os.makedirs(mask_npy_directory)
+        if not os.path.exists(mask_img_directory):
+            os.makedirs(mask_img_directory)
+
         print("save mask")
-        for mask in video_state["masks"]:
-            np.save(os.path.join('./result/mask/{}'.format(video_state["video_name"].split('.')[0]), '{:05d}.npy'.format(i)), mask)
-            i+=1
-        # save_mask(video_state["masks"], video_state["video_name"])
+        for i, mask in enumerate(video_state["masks"]):
+            # Save as .npy file
+            npy_path = os.path.join(mask_npy_directory, '{:05d}.npy'.format(i))
+            np.save(npy_path, mask)
+
+            # Convert mask values to 0 or 255 and save as .png image
+            mask_img = (mask * 255).astype(np.uint8)
+            png_path = os.path.join(mask_img_directory, '{:05d}.png'.format(i))
+            cv2.imwrite(png_path, mask_img)
     #### shanggao code for mask save
     return video_output, video_state, interactive_state, operation_log
 
@@ -486,6 +499,9 @@ with gr.Blocks() as iface:
 
         # for user video input
         with gr.Column():
+            # Customized Input
+            image_path = gr.Textbox(label="Image Sequence Path", placeholder="Enter the path to your image sequence")
+            load_button = gr.Button("Load Images")
             with gr.Row(scale=0.4):
                 video_input = gr.Video(autosize=True)
                 with gr.Column():
@@ -521,17 +537,29 @@ with gr.Blocks() as iface:
                 with gr.Column():
                     run_status = gr.HighlightedText(value=[("Text","Error"),("to be","Label 2"),("highlighted","Label 3")], visible=False)
                     mask_dropdown = gr.Dropdown(multiselect=True, value=[], label="Mask selection", info=".", visible=False)
-                    video_output = gr.Video(autosize=True, visible=False).style(height=360)
+                    # video_output = gr.Video(autosize=True, visible=False).style(height=360)
+                    # Here I cancel the height limit of the video, or part of the video will be hidden
+                    video_output = gr.Video(autosize=True, visible=False)
                     with gr.Row():
                         tracking_video_predict_button = gr.Button(value="Tracking", visible=False)
                         inpaint_video_predict_button = gr.Button(value="Inpainting", visible=False)
 
     # first step: get the video information 
     extract_frames_button.click(
-        folder_path = '/home/ubuntu/Downloads/data_tracking_image_2/training/image_02/0002'
-        fn=get_frames_from_folder(folder_path, video_state),
+        fn=get_frames_from_video,
         inputs=[
             video_input, video_state
+        ],
+        outputs=[video_state, video_info, template_frame,
+                 image_selection_slider, track_pause_number_slider,point_prompt, clear_button_click, Add_mask_button, template_frame,
+                 tracking_video_predict_button, video_output, mask_dropdown, remove_mask_button, inpaint_video_predict_button, run_status]
+    )
+
+    # Add my own button
+    load_button.click(
+        fn=get_frames_from_folder,
+        inputs=[
+            image_path, video_state
         ],
         outputs=[video_state, video_info, template_frame,
                  image_selection_slider, track_pause_number_slider,point_prompt, clear_button_click, Add_mask_button, template_frame,
