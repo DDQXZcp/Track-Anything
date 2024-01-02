@@ -339,8 +339,8 @@ def vos_tracking_video(video_state, interactive_state, mask_dropdown):
     #### shanggao code for mask save
     # Modify Save mask
     if interactive_state["mask_save"]:
-        mask_npy_directory = './result/mask/{}'.format(video_state["video_name"].split('.')[0])
-        mask_img_directory = './result/mask_img/{}'.format(video_state["video_name"].split('.')[0])
+        mask_npy_directory = './result/{}/mask'.format(video_state["video_name"].split('.')[0])
+        mask_img_directory = './result/{}/mask_img'.format(video_state["video_name"].split('.')[0])
         
         if not os.path.exists(mask_npy_directory):
             os.makedirs(mask_npy_directory)
