@@ -188,6 +188,7 @@ def get_frames_from_folder(folder_path, video_state):
 def generate_mask_file(directory_path):
     rgb_file = os.path.join(directory_path, 'rgb.txt')
     mask_file = os.path.join(directory_path, 'mask.txt')
+    print('mask_file', mask_file)
 
     with open(rgb_file, 'r') as file:
         lines = file.readlines()
