@@ -130,19 +130,21 @@ def get_frames_from_folder(folder_path, video_state):
     Return:
         Updated video state with loaded frames
     """
-    # Modify folder_path to local
-    # folder_path = '/home/ubuntu/Downloads/data_tracking_image_2/training/image_02/0002'
+    # Generate mask.txt from rgb.txt
+    generate_mask_file(folder_path)
+
     frames = []
     user_name = time.time()
     operation_log = [("",""),("Images loaded from folder. Try clicking the image for adding targets to track and inpaint.","Normal")]
+    img_path = "{}/rgb".format(folder_path)
     try:
         # List all images in folder
-        image_files = [img for img in os.listdir(folder_path) if img.endswith(".png") or img.endswith(".jpg")]
+        image_files = [img for img in os.listdir(img_path) if img.endswith(".png") or img.endswith(".jpg")]
         image_files.sort()  # Sort the images if they are numbered
 
         # Read images
         for image_file in image_files:
-            frame = cv2.imread(os.path.join(folder_path, image_file))
+            frame = cv2.imread(os.path.join(img_path, image_file))
             if frame is not None:
                 frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
             else:
@@ -181,6 +183,27 @@ def get_frames_from_folder(folder_path, video_state):
                             gr.update(visible=True, value=operation_log)
     else:
         return None, "No images loaded", None, None, None, None, None, None, None, None, None, None, None, None, None
+
+# Read rgb.txt and generate mask.txt, dedicated for TUM dataset
+def generate_mask_file(directory_path):
+    rgb_file = os.path.join(directory_path, 'rgb.txt')
+    mask_file = os.path.join(directory_path, 'mask.txt')
+
+    with open(rgb_file, 'r') as file:
+        lines = file.readlines()
+
+    mask_index = 0
+    with open(mask_file, 'w') as file:
+        for line in lines:
+            if line.startswith('#'):
+                # Write comment lines as they are
+                file.write(line)
+            else:
+                # Process and write the mask file lines
+                timestamp, _ = line.split()
+                new_filename = "mask/{:05d}.png".format(mask_index)
+                file.write(f"{timestamp} {new_filename}\n")
+                mask_index += 1
 
 def run_example(example):
     return video_input
@@ -339,8 +362,11 @@ def vos_tracking_video(video_state, interactive_state, mask_dropdown):
     #### shanggao code for mask save
     # Modify Save mask
     if interactive_state["mask_save"]:
-        mask_npy_directory = './result/{}/mask'.format(video_state["video_name"].split('.')[0])
-        mask_img_directory = './result/{}/mask_img'.format(video_state["video_name"].split('.')[0])
+        # mask_npy_directory = './result/{}/mask_npy'.format(video_state["video_name"].split('.')[0])
+        # mask_img_directory = './result/{}/mask'.format(video_state["video_name"].split('.')[0])
+        mask_npy_directory = '{}/mask_npy'.format(image_path)
+        mask_img_directory = '{}/mask'.format(image_path)
+        # Todo: Fix the image_path, now they are textbox instead of string
         
         if not os.path.exists(mask_npy_directory):
             os.makedirs(mask_npy_directory)
@@ -500,8 +526,10 @@ with gr.Blocks() as iface:
         # for user video input
         with gr.Column():
             # Customized Input
-            image_path = gr.Textbox(label="Image Sequence Path", placeholder="Enter the path to your image sequence")
+            image_path = gr.Textbox(label="TUM Dataset Path", placeholder="Enter the path to your tum path")
             load_button = gr.Button("Load Images")
+            rgb_txt_path = gr.Textbox(label="TUM rgb.txt file path", placeholder="Enter the path to your rgb.txt")
+            rgb_txt_button = gr.Button("Generate mask.txt")
             with gr.Row(scale=0.4):
                 video_input = gr.Video(autosize=True)
                 with gr.Column():
@@ -564,6 +592,13 @@ with gr.Blocks() as iface:
         outputs=[video_state, video_info, template_frame,
                  image_selection_slider, track_pause_number_slider,point_prompt, clear_button_click, Add_mask_button, template_frame,
                  tracking_video_predict_button, video_output, mask_dropdown, remove_mask_button, inpaint_video_predict_button, run_status]
+    )   
+
+    rgb_txt_button.click(
+        fn=generate_mask_file,
+        inputs=[
+            rgb_txt_path
+        ]
     )   
 
     # second step: select images from slider
