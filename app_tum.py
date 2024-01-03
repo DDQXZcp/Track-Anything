@@ -312,7 +312,7 @@ def show_mask(video_state, interactive_state, mask_dropdown):
     return select_frame, operation_log
 
 # tracking vos
-def vos_tracking_video(video_state, interactive_state, mask_dropdown):
+def vos_tracking_video(video_state, interactive_state, mask_dropdown, folder_path):
     operation_log = [("",""), ("Track the selected masks, and then you can select the masks for inpainting.","Normal")]
     model.xmem.clear_memory()
     if interactive_state["track_end_number"]:
@@ -364,8 +364,10 @@ def vos_tracking_video(video_state, interactive_state, mask_dropdown):
     if interactive_state["mask_save"]:
         # mask_npy_directory = './result/{}/mask_npy'.format(video_state["video_name"].split('.')[0])
         # mask_img_directory = './result/{}/mask'.format(video_state["video_name"].split('.')[0])
-        mask_npy_directory = '{}/mask_npy'.format(image_path)
-        mask_img_directory = '{}/mask'.format(image_path)
+        mask_npy_directory = '{}/mask_npy'.format(folder_path)
+        mask_img_directory = '{}/mask'.format(folder_path)
+        print('mask_npy_directory', mask_npy_directory)
+        print('mask_img_directory', mask_img_directory)
         # Todo: Fix the image_path, now they are textbox instead of string
         
         if not os.path.exists(mask_npy_directory):
@@ -635,7 +637,7 @@ with gr.Blocks() as iface:
     # tracking video from select image and mask
     tracking_video_predict_button.click(
         fn=vos_tracking_video,
-        inputs=[video_state, interactive_state, mask_dropdown],
+        inputs=[video_state, interactive_state, mask_dropdown, image_path],# add one more input image_path
         outputs=[video_output, video_state, interactive_state, run_status]
     )
 
