@@ -531,8 +531,8 @@ with gr.Blocks() as iface:
             # Customized Input
             image_path = gr.Textbox(label="TUM Dataset Path", placeholder="Enter the path to your tum path")
             load_button = gr.Button("Load Images")
-            rgb_txt_path = gr.Textbox(label="TUM rgb.txt file path", placeholder="Enter the path to your rgb.txt")
-            rgb_txt_button = gr.Button("Generate mask.txt")
+            # rgb_txt_path = gr.Textbox(label="TUM rgb.txt file path", placeholder="Enter the path to your rgb.txt")
+            # rgb_txt_button = gr.Button("Generate mask.txt")
             with gr.Row(scale=0.4):
                 video_input = gr.Video(autosize=True)
                 with gr.Column():
@@ -597,12 +597,12 @@ with gr.Blocks() as iface:
                  tracking_video_predict_button, video_output, mask_dropdown, remove_mask_button, inpaint_video_predict_button, run_status]
     )   
 
-    rgb_txt_button.click(
-        fn=generate_mask_file,
-        inputs=[
-            rgb_txt_path
-        ]
-    )   
+    # rgb_txt_button.click(
+    #     fn=generate_mask_file,
+    #     inputs=[
+    #         rgb_txt_path
+    #     ]
+    # )   
 
     # second step: select images from slider
     image_selection_slider.release(fn=select_template, 
