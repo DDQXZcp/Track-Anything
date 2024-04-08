@@ -365,22 +365,22 @@ def vos_tracking_video(video_state, interactive_state, mask_dropdown, folder_pat
     if interactive_state["mask_save"]:
         # mask_npy_directory = './result/{}/mask_npy'.format(video_state["video_name"].split('.')[0])
         # mask_img_directory = './result/{}/mask'.format(video_state["video_name"].split('.')[0])
-        mask_npy_directory = '{}/mask_npy'.format(folder_path)
+        # mask_npy_directory = '{}/mask_npy'.format(folder_path)
         mask_img_directory = '{}/mask'.format(folder_path)
-        print('mask_npy_directory', mask_npy_directory)
+        # print('mask_npy_directory', mask_npy_directory)
         print('mask_img_directory', mask_img_directory)
         # Todo: Fix the image_path, now they are textbox instead of string
         
-        if not os.path.exists(mask_npy_directory):
-            os.makedirs(mask_npy_directory)
+        # if not os.path.exists(mask_npy_directory):
+        #     os.makedirs(mask_npy_directory)
         if not os.path.exists(mask_img_directory):
             os.makedirs(mask_img_directory)
 
         print("save mask")
         for i, mask in enumerate(video_state["masks"]):
             # Save as .npy file
-            npy_path = os.path.join(mask_npy_directory, '{:05d}.npy'.format(i))
-            np.save(npy_path, mask)
+            # npy_path = os.path.join(mask_npy_directory, '{:05d}.npy'.format(i))
+            # np.save(npy_path, mask)
 
             # Convert mask values to 0 or 255 and save as .png image
             mask_img = (mask * 255).astype(np.uint8)
@@ -529,7 +529,7 @@ with gr.Blocks() as iface:
         # for user video input
         with gr.Column():
             # Customized Input
-            image_path = gr.Textbox(label="TUM Dataset Path", placeholder="Enter the path to your tum path")
+            image_path = gr.Textbox(label="TUM Dataset Path", default = '/home/ubuntu/Downloads/rgbd_dataset_freiburg3_walking_xyz')
             load_button = gr.Button("Load Images")
             # rgb_txt_path = gr.Textbox(label="TUM rgb.txt file path", placeholder="Enter the path to your rgb.txt")
             # rgb_txt_button = gr.Button("Generate mask.txt")
