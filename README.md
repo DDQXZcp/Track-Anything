@@ -1,3 +1,34 @@
+## Project Overview
+
+This project is for DICTA 2024 Paper:
+
+- Zhiheng Tang (CSIRO), Chuong Nguyen (CSIRO), Sundaram Muthu (CSIRO), “Dynamic SLAM using video object segmentation: A low-cost setup for mobile robots,” DICTA 2024, Perth, Australia.
+
+SLAM approaches, whether traditional, deep learning-based, or incorporating radiance field representations, face a common challenge in handling dynamic scenes due to their assumption of a static environment.While some methods have attempted dynamic SLAM, they often rely on single-object semantic segmentation, which is effective only for known object classes with prior knowledge of their static or dynamic nature. To address this limitation, we propose incorporating video object segmentation methods into our approach, which combines segmentation and tracking.
+
+To demonstrate the effectiveness of our method, we conduct an experimental study using the TUM-RGBD dataset and our RoverLab dynamic SLAM dataset, showcasing an enhancement in SLAM accuracy.
+
+## Feature
+
+We modified the GUI to directly load the TUM dataset image sequence into the system. After tracking, it automatically outputs the mask images to the /mask folder and saves the timestamps in mask.txt. Each mask image corresponds one-to-one with an RGB image.
+
+The modified GUI is updated in:
+- app_tum.py
+
+## How to Run
+
+Run in the same Anaconda environment as the original Track-Anything.
+
+~~~
+python app_tum.py
+~~~
+
+## Acknowledgement
+
+This project utilizes Track-Anything to generate dynamic object masks. The original project description is below.
+
+![alt text](Track-anything-ezgif.com-video-to-gif-converter.gif)
+
 <!-- ![](./assets/track-anything-logo.jpg) -->
 
 <div align=center>
