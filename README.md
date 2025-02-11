@@ -23,11 +23,11 @@ Run in the same Anaconda environment as the original Track-Anything.
 python app_tum.py
 ~~~
 
+![alt text](Track-anything-ezgif.com-video-to-gif-converter.gif)
+
 ## Acknowledgement
 
 This project utilizes Track-Anything to generate dynamic object masks. The original project description is below.
-
-![alt text](Track-anything-ezgif.com-video-to-gif-converter.gif)
 
 <!-- ![](./assets/track-anything-logo.jpg) -->
 
